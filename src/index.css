@@ -696,6 +696,23 @@ input, select, textarea { font-family: inherit; }
   height: 280px;
 }
 
+.recharts-default-tooltip {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 8px !important;
+}
+
+.recharts-tooltip-item,
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  color: var(--text-primary) !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--text-secondary) !important;
+}
+
+
 /* ── Toast ── */
 .toast-container {
   position: fixed;
