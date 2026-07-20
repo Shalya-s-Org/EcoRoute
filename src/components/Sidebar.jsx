@@ -1,12 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard, Cpu, CalendarClock, BarChart3, Settings, ScrollText, Leaf,
+  LayoutDashboard, Cpu, CalendarClock, BarChart3, Settings, ScrollText, Leaf, Binary, Users
 } from 'lucide-react';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/devices', icon: Cpu, label: 'Devices' },
   { to: '/schedule', icon: CalendarClock, label: 'Schedule' },
+  { to: '/digital-twin', icon: Binary, label: 'Digital Twin' },
+  { to: '/agents', icon: Users, label: 'AI Agents' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/settings', icon: Settings, label: 'Settings' },
   { to: '/logs', icon: ScrollText, label: 'Agent Log' },

@@ -3,24 +3,38 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import {
-  Zap, Leaf, DollarSign, Activity, Cloud, Thermometer, RefreshCw,
+  Zap, Leaf, DollarSign, Activity, Cloud, Thermometer, RefreshCw, Sun, Battery, Home, ShieldAlert
 } from 'lucide-react';
 import { getCurrentIntensity } from '../services/gridService';
 import { getDevices } from '../services/iotService';
 import { getLogs } from '../services/notifierService';
 
 function fmt(iso) {
+  if (!iso) return '';
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 export default function Dashboard({
   carbonData, tariffData, weatherData, schedules, savings,
-  gridSource, agentStatus, tickCount, runAgentTick,
+  gridSource, agentStatus, tickCount, settings, runAgentTick, telemetry
 }) {
   const current = getCurrentIntensity(carbonData);
   const devices = getDevices();
   const activeDevices = devices.filter(d => d.state === 'on').length;
-  const recentLogs = getLogs().slice(0, 6);
+  const recentLogs = getLogs().slice(0, 5);
+
+  const currentTel = useMemo(() => {
+    if (telemetry && telemetry.length > 0) return telemetry[0];
+    return {
+      solarGen: 1800,
+      applianceLoad: 3500,
+      batterySoC: 45,
+      batteryPower: 1200, // positive = charging
+      gridPower: 2900,
+      indoorTemp: 21.5,
+      outdoorTemp: 14,
+    };
+  }, [telemetry]);
 
   const chartData = useMemo(() =>
     carbonData.map((d, i) => ({
@@ -49,17 +63,121 @@ export default function Dashboard({
     return actions.slice(0, 4);
   }, [schedules, devices, carbonData]);
 
+  // Determine power flow directions
+  const isSolarGenerating = currentTel.solarGen > 0;
+  const isBatteryCharging = currentTel.batteryPower > 0;
+  const isBatteryDischarging = currentTel.batteryPower < 0;
+  const isGridImporting = currentTel.gridPower > 0;
+  const isGridExporting = currentTel.gridPower < 0;
+
   return (
     <div className="page-content">
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2>Dashboard</h2>
-          <p>Real-time energy optimization overview</p>
+          <p>Real-time Smart Grid agent optimization overview</p>
         </div>
-        <button className="btn btn-secondary" onClick={runAgentTick} id="btn-refresh">
-          <RefreshCw size={16} className={agentStatus === 'running' ? 'spin' : ''} />
-          Tick #{tickCount}
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          {settings.emergencyMode && (
+            <span className="badge red" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <ShieldAlert size={14} /> Emergency Grid Mode
+            </span>
+          )}
+          <button className="btn btn-secondary" onClick={runAgentTick} id="btn-refresh">
+            <RefreshCw size={16} className={agentStatus === 'running' ? 'spin' : ''} />
+            Tick #{tickCount}
+          </button>
+        </div>
+      </div>
+
+      {/* Real-time power flow diagram */}
+      <div className="card" style={{ marginBottom: 'var(--space-6)', overflow: 'hidden' }} id="realtime-flow">
+        <div className="card-header">
+          <span className="card-title">Real-Time Power Flow Telemetry</span>
+          <span className="badge green">● Live Twin Loop</span>
+        </div>
+        
+        <div className="power-flow-container">
+          <svg className="power-flow-svg" viewBox="0 0 500 300">
+            {/* SVG Connecting Paths */}
+            
+            {/* Solar -> Home */}
+            <path
+              d="M 100 80 L 250 150"
+              className={`flow-line ${isSolarGenerating ? 'active' : ''}`}
+              style={{ strokeDashoffset: isSolarGenerating ? undefined : 0 }}
+            />
+            {/* Solar -> Battery */}
+            <path
+              d="M 100 80 L 100 220"
+              className={`flow-line ${isSolarGenerating && isBatteryCharging ? 'active' : ''}`}
+            />
+            {/* Battery -> Home */}
+            <path
+              d="M 100 220 L 250 150"
+              className={`flow-line ${isBatteryDischarging ? 'active' : ''}`}
+            />
+            {/* Grid -> Home / Home -> Grid */}
+            <path
+              d="M 400 80 L 250 150"
+              className={`flow-line ${isGridImporting ? 'active' : isGridExporting ? 'active reverse' : ''}`}
+            />
+
+            {/* Nodes */}
+            
+            {/* Solar Node */}
+            <g transform="translate(100, 80)">
+              <circle r="40" className="node-circle solar" />
+              <foreignObject x="-30" y="-30" width="60" height="60">
+                <div className="node-content">
+                  <Sun size={20} className="node-icon solar-icon animate-pulse" />
+                  <span className="node-val">{currentTel.solarGen}W</span>
+                  <span className="node-lbl">Solar</span>
+                </div>
+              </foreignObject>
+            </g>
+
+            {/* Battery Node */}
+            <g transform="translate(100, 220)">
+              <circle r="40" className="node-circle battery" />
+              <foreignObject x="-30" y="-30" width="60" height="60">
+                <div className="node-content">
+                  <Battery size={20} className="node-icon battery-icon" />
+                  <span className="node-val">{currentTel.batterySoC}%</span>
+                  <span className="node-lbl" style={{ fontSize: '9px' }}>
+                    {isBatteryCharging ? `+${currentTel.batteryPower}W` : isBatteryDischarging ? `${currentTel.batteryPower}W` : 'Idle'}
+                  </span>
+                </div>
+              </foreignObject>
+            </g>
+
+            {/* Home Loads Node */}
+            <g transform="translate(250, 150)">
+              <circle r="45" className="node-circle home-loads" />
+              <foreignObject x="-35" y="-35" width="70" height="70">
+                <div className="node-content">
+                  <Home size={22} className="node-icon home-icon" />
+                  <span className="node-val">{currentTel.applianceLoad}W</span>
+                  <span className="node-lbl">House Load</span>
+                </div>
+              </foreignObject>
+            </g>
+
+            {/* Grid Node */}
+            <g transform="translate(400, 80)">
+              <circle r="40" className="node-circle grid-node" />
+              <foreignObject x="-30" y="-30" width="60" height="60">
+                <div className="node-content">
+                  <Zap size={20} className="node-icon grid-icon" />
+                  <span className="node-val">
+                    {isGridExporting ? `${Math.abs(currentTel.gridPower)}W` : `${currentTel.gridPower}W`}
+                  </span>
+                  <span className="node-lbl">{isGridExporting ? 'Exporting' : 'Importing'}</span>
+                </div>
+              </foreignObject>
+            </g>
+          </svg>
+        </div>
       </div>
 
       {/* Metrics Row */}
@@ -145,7 +263,7 @@ export default function Dashboard({
           {/* Weather */}
           <div className="card" id="card-weather">
             <div className="card-header">
-              <span className="card-title">Weather</span>
+              <span className="card-title">Weather Status</span>
               <Cloud size={16} color="var(--text-tertiary)" />
             </div>
             {weatherData[0] && (
@@ -164,7 +282,7 @@ export default function Dashboard({
           {/* Next Actions */}
           <div className="card" id="card-next-actions">
             <div className="card-header">
-              <span className="card-title">Next Scheduled</span>
+              <span className="card-title">Next Scheduled Runs</span>
             </div>
             {nextActions.length ? nextActions.map((a, i) => (
               <div key={i} style={{
@@ -183,7 +301,7 @@ export default function Dashboard({
           {/* Agent Feed */}
           <div className="card" id="card-agent-feed">
             <div className="card-header">
-              <span className="card-title">Agent Activity</span>
+              <span className="card-title">Agent Team Feed</span>
               <span className={`badge ${agentStatus === 'idle' ? 'green' : 'amber'}`}>{agentStatus}</span>
             </div>
             <div style={{ maxHeight: 180, overflow: 'auto' }}>
