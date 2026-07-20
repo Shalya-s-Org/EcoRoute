@@ -250,6 +250,8 @@ export default function Dashboard({
                     borderRadius: '8px',
                     fontSize: '13px',
                   }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-secondary)' }}
                 />
                 <Area type="monotone" dataKey="carbon" stroke="#10b981" fill="url(#carbonGradient)" strokeWidth={2} name="Carbon (gCO₂)" />
                 <Area type="monotone" dataKey="price" stroke="#fbbf24" fill="url(#priceGradient)" strokeWidth={2} name="Price (¢/kWh)" />

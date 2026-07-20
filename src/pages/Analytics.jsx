@@ -88,6 +88,8 @@ export default function Analytics({ carbonData, savings, schedules }) {
                     border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                   }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-secondary)' }}
                 />
                 <Bar dataKey="flat" fill="rgba(248,113,113,0.5)" name="Flat Schedule (¢)" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="optimized" fill="#10b981" name="Optimized (¢)" radius={[4, 4, 0, 0]} />
@@ -125,6 +127,8 @@ export default function Analytics({ carbonData, savings, schedules }) {
                     border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                   }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-secondary)' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -157,6 +161,8 @@ export default function Analytics({ carbonData, savings, schedules }) {
                     border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                   }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-secondary)' }}
                 />
                 <Bar dataKey="carbonSaved" fill="#22d3ee" name="CO₂ Avoided (g)" radius={[4, 4, 0, 0]} />
               </BarChart>

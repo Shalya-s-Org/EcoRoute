@@ -180,7 +180,11 @@ export default function DigitalTwin({ carbonData, tariffData, schedules, setting
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.06)" />
                   <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={9} tickLine={false} interval={7} />
                   <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={9} tickLine={false} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 6 }} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 6 }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-secondary)' }}
+                  />
                   <Line type="monotone" dataKey="batterySoC" stroke="var(--accent)" strokeWidth={2} dot={false} name="SoC (%)" />
                 </LineChart>
               </ResponsiveContainer>
@@ -204,7 +208,11 @@ export default function DigitalTwin({ carbonData, tariffData, schedules, setting
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.06)" />
                   <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={9} tickLine={false} interval={7} />
                   <YAxis stroke="var(--text-muted)" fontSize={9} tickLine={false} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 6 }} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 6 }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-secondary)' }}
+                  />
                   <Area type="monotone" dataKey="indoorTemp" stroke="#3b82f6" fill="url(#indoorTempGrad)" strokeWidth={2} name="Indoor Room (°C)" />
                   <Line type="monotone" dataKey="outdoorTemp" stroke="var(--text-muted)" strokeWidth={1} dot={false} name="Outdoor Ambient (°C)" />
                 </AreaChart>
